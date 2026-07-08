@@ -1,0 +1,6 @@
+{
+  "name": "YouTube Music Clone",
+  "description": "YouTube Music Android clone with real audio playback, AI-powered playlist generator, AI lyrics explanation, and elegant dark theme.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
