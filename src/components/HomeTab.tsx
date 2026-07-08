@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Play, SkipForward, Radio, Sparkles, Heart, Clock, Music } from 'lucide-react';
 import { Song, ActiveTab } from '../types';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion'; // PERBAIKAN: Menggunakan library standar
 
 interface HomeTabProps {
   songs: Song[];
@@ -17,9 +17,9 @@ interface HomeTabProps {
 }
 
 export default function HomeTab({
-  songs,
-  history,
-  likedSongs,
+  songs = [], // Amankan dengan default value array kosong
+  history = [],
+  likedSongs = [],
   currentSong,
   onPlaySong,
   onPlayQueue,
@@ -31,14 +31,12 @@ export default function HomeTab({
   const [activeMood, setActiveMood] = useState<string>('All');
   const [djLoading, setDjLoading] = useState(false);
 
-  // Filter categories
   const moodPills = ['All', 'Relax', 'Energize', 'Focus', 'Chill', 'Romance'];
 
   const filteredSongs = activeMood === 'All' 
     ? songs 
-    : songs.filter(s => s.mood.toLowerCase() === activeMood.toLowerCase() || s.genre.toLowerCase().includes(activeMood.toLowerCase()));
+    : songs.filter(s => s.mood?.toLowerCase() === activeMood.toLowerCase() || s.genre?.toLowerCase().includes(activeMood.toLowerCase()));
 
-  // Greeting based on current hour
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Selamat pagi';
@@ -49,7 +47,6 @@ export default function HomeTab({
 
   const handleDjClick = () => {
     setDjLoading(true);
-    // Simulate DJ scanning history and setting mood
     setTimeout(() => {
       onStartAIDJ(activeMood === 'All' ? 'personalized' : activeMood);
       setDjLoading(false);
@@ -59,7 +56,7 @@ export default function HomeTab({
   return (
     <div id="home-tab-container" className="space-y-8 pb-32 pt-2">
       {/* Mood Filters */}
-      <div id="mood-filters-scroller" className="flex gap-2 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div id="mood-filters-scroller" className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0" style={{ scrollbarWidth: 'none' }}>
         {moodPills.map((mood) => (
           <button
             key={mood}
@@ -205,7 +202,7 @@ export default function HomeTab({
           <h2 className="text-lg sm:text-xl font-extrabold text-white flex items-center gap-2">
             <Clock className="w-5 h-5 text-zinc-400" /> Putar Lagi
           </h2>
-          <div id="history-row-scroller" className="flex gap-4 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div id="history-row-scroller" className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0" style={{ scrollbarWidth: 'none' }}>
             {history.slice(0, 5).map((song) => (
               <div
                 key={song.id}
@@ -240,7 +237,7 @@ export default function HomeTab({
         <h2 className="text-lg sm:text-xl font-extrabold text-white flex items-center gap-2">
           <Radio className="w-5 h-5 text-red-600" /> Rekomendasi Campuran
         </h2>
-        <div id="featured-row-scroller" className="flex gap-4 overflow-x-auto pb-2 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div id="featured-row-scroller" className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0" style={{ scrollbarWidth: 'none' }}>
           {[
             { id: 'mix-1', title: 'My Supermix', desc: 'Campuran lagu favorit & baru', gradient: 'from-blue-600 to-indigo-900', songsSlice: [0, 1, 2, 3] },
             { id: 'mix-2', title: 'Relaxing Lo-Fi Chill', desc: 'Sempurna untuk fokus & santai', gradient: 'from-purple-600 to-pink-900', songsSlice: [3, 5, 8, 2] },
@@ -250,8 +247,11 @@ export default function HomeTab({
               key={mix.id}
               id={`featured-mix-${mix.id}`}
               onClick={() => {
-                const mixSongs = mix.songsSlice.map(idx => songs[idx]);
-                onPlayQueue(mixSongs, 0);
+                // PERBAIKAN: Filter indeks yang undefined agar aman dari crash
+                const mixSongs = mix.songsSlice
+                  .map(idx => songs[idx])
+                  .filter(song => song !== undefined);
+                if (mixSongs.length > 0) onPlayQueue(mixSongs, 0);
               }}
               className="w-40 sm:w-44 flex-shrink-0 space-y-2 cursor-pointer group text-left"
             >
